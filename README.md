@@ -23,6 +23,7 @@ Make sure these ports are open/forwarded to the machine (default ports):
 * UDP 50001
 * UDP 3478
 * UDP 8054
+* ICMP In & Out
 
 ### Arguments
 
