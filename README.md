@@ -1,26 +1,24 @@
 # cncnet-server
 
-* .NET7
+* .NET7, .NET8 (preview)
 * Cross platform (Windows, Linux, Mac, ...)
 * No admin privileges required to run
 * Supports CnCNet V2 & V3 tunnel protocol
 * Supports CnCNet STUN protocol (for P2P clients)
 * Supports IPv4 & IPv6
 
-## Versions
-
-* OS specific versions `win-x64` etc.: Use for best performance.
-* Cross platform version `any`: Runs on all supported .NET platforms.
-
 ## How to run/install
 
-Requires the [.NET Runtime 7 and ASP.NET Core Runtime 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0/runtime).
+* The .NET7 V3 version requires the [.NET Runtime 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0/runtime).
+* The .NET7 V3+V2 version additionally requires the [ASP.NET Core Runtime 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0/runtime).
+* The .NET8 V3 version requires the [.NET Runtime 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0/runtime).
+* The .NET8 V3+V2 version additionally requires the [ASP.NET Core Runtime 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0/runtime).
 
 Make sure these ports are open/forwarded to the machine (default ports):
 
-* TCP 50000
-* UDP 50000
-* UDP 50001
+* TCP 50000 (V2)
+* UDP 50000 (V2)
+* UDP 50001 (V3)
 * UDP 3478
 * UDP 8054
 * ICMP In & Out
@@ -78,7 +76,7 @@ cncnet-server --name NewServer
 ### Install as a service on Windows (using PowerShell)
 
 ```
-Download <cncnet-server-win-x64.zip>
+Download <cncnet-server-win10-x64.zip>
 ```
 
 ```
@@ -96,16 +94,19 @@ Start-Service CnCNetServer
 ### Install as a service on Linux (Ubuntu example)
 
 ```
+wget https://packages.microsoft.com/config/ubuntu/22.10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
 sudo apt-get update && \
   sudo apt-get install -y aspnetcore-runtime-7.0
 ```
 
 ```
-wget <cncnet-server-linux-x64.zip>
+wget <cncnet-server-ubuntu.22.04-x64.zip>
 ```
 
 ```
-unzip -d cncnet-server <cncnet-server-linux-x64.zip>
+unzip -d cncnet-server <cncnet-server-ubuntu.22.04-x64.zip>
 ```
 
 ```
@@ -151,6 +152,7 @@ Restart=always
 RestartSec=5
 
 KillSignal=SIGINT
+Environment=DOTNET_ENVIRONMENT=Production
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
 
@@ -160,29 +162,14 @@ WantedBy=multi-user.target
 
 ```
 sudo systemctl daemon-reload
-```
-
-```
 sudo systemctl start cncnet-server.service
 ```
 
 ```
 sudo ufw allow proto tcp from any to any port 50000
-```
-
-```
 sudo ufw allow proto udp from any to any port 50000
-```
-
-```
 sudo ufw allow proto udp from any to any port 50001
-```
-
-```
 sudo ufw allow proto udp from any to any port 3478
-```
-
-```
 sudo ufw allow proto udp from any to any port 8054
 ```
 

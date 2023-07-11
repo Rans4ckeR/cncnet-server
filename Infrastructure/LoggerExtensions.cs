@@ -4,21 +4,16 @@ internal static partial class LoggerExtensions
 {
     public static async ValueTask LogExceptionDetailsAsync(this ILogger logger, Exception exception, HttpResponseMessage? httpResponseMessage = null)
     {
-        logger.LogExceptionDetails(exception);
+        logger.LogException(exception.GetDetailedExceptionInfo());
 
         if (httpResponseMessage is not null)
             logger.LogException(await httpResponseMessage.GetHttpResponseMessageInfoAsync().ConfigureAwait(false));
     }
 
-    public static void LogExceptionDetails(this ILogger logger, Exception exception)
-        => logger.LogException(exception.GetDetailedExceptionInfo());
-
     public static void ConfigureLogging(this ILoggingBuilder loggingBuilder, LogLevel serverLogLevel, LogLevel systemLogLevel)
-    {
-        loggingBuilder
-            .SetMinimumLevel(systemLogLevel)
-            .AddFilter(nameof(CnCNetServer), serverLogLevel);
-    }
+        => _ = loggingBuilder
+                .SetMinimumLevel(systemLogLevel)
+                .AddFilter(nameof(CnCNetServer), serverLogLevel);
 
     [LoggerMessage(EventId = 4, Level = LogLevel.Trace, Message = "{message}")]
     public static partial void LogTrace(this ILogger logger, string message);
