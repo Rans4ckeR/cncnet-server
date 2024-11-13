@@ -6,8 +6,6 @@ internal sealed class TunnelClient
 
     private long lastReceiveTick;
 
-    private SocketAddress? remoteSocketAddress;
-
     public TunnelClient(int timeout, SocketAddress? remoteSocketAddress = null)
     {
         this.timeout = timeout;
@@ -18,12 +16,12 @@ internal sealed class TunnelClient
 
     public SocketAddress? RemoteSocketAddress
     {
-        get => remoteSocketAddress;
+        get;
 
         set
         {
-            remoteSocketAddress = value;
-            RemoteIpEndPoint = remoteSocketAddress is not null ? (IPEndPoint)new IPEndPoint(0, 0).Create(remoteSocketAddress) : null;
+            field = value;
+            RemoteIpEndPoint = field is not null ? (IPEndPoint)new IPEndPoint(0, 0).Create(field) : null;
         }
     }
 

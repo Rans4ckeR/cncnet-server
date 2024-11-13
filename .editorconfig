@@ -20,7 +20,7 @@ insert_final_newline = false
 # Organize usings
 dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = true
-file_header_template = unset
+file_header_template =
 
 # this. and Me. preferences
 dotnet_style_qualification_for_event = false:warning
@@ -410,6 +410,9 @@ csharp_prefer_system_threading_lock = true:warning
 dotnet_diagnostic.IDE0330.severity = warning
 dotnet_diagnostic.IDE0320.severity = warning
 
+# ReSharper properties
+resharper_braces_redundant = false
+
 [*.{cs,vb}]
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 tab_width = 4
@@ -628,6 +631,8 @@ dotnet_diagnostic.MSTEST0029.severity = warning
 dotnet_diagnostic.MSTEST0026.severity = warning
 dotnet_diagnostic.MSTEST0030.severity = warning
 dotnet_diagnostic.MSTEST0031.severity = warning
+dotnet_diagnostic.MSTEST0034.severity = warning
+dotnet_diagnostic.MSTEST0035.severity = warning
 
 [*.vb]
 dotnet_diagnostic.CA1047.severity = warning
