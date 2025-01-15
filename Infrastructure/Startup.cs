@@ -1,5 +1,4 @@
-﻿using System.Collections.Frozen;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.CommandLine.Hosting;
 using System.CommandLine.Invocation;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,7 +46,7 @@ internal static class Startup
     public static void ConfigureLogging(HostBuilderContext context, ILoggingBuilder builder)
     {
         InvocationContext invocationContext = context.GetInvocationContext();
-        var options = invocationContext.ParseResult.RootCommandResult.Command.Options.ToFrozenSet();
+        IReadOnlyList<Option> options = invocationContext.ParseResult.RootCommandResult.Command.Options;
         Option serverLogLevelOption = options.Single(static q => q.Name.Equals(nameof(ServiceOptions.ServerLogLevel), StringComparison.OrdinalIgnoreCase));
         Option systemLogLevelOption = options.Single(static q => q.Name.Equals(nameof(ServiceOptions.SystemLogLevel), StringComparison.OrdinalIgnoreCase));
         var serverLogLevel = (LogLevel)invocationContext.ParseResult.GetValueForOption(serverLogLevelOption)!;

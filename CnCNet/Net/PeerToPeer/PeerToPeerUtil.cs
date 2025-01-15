@@ -16,9 +16,7 @@ internal sealed class PeerToPeerUtil(ILogger<PeerToPeerUtil> logger) : IAsyncDis
     public ValueTask StartAsync(int listenPort, CancellationToken cancellationToken)
     {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-#pragma warning disable IDE0058 // Expression value is never used
-        ResetConnectionCounterAsync(cancellationToken);
-#pragma warning restore IDE0058 // Expression value is never used
+        _ = ResetConnectionCounterAsync(cancellationToken);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
         return StartReceiverAsync(listenPort, cancellationToken);
@@ -84,9 +82,7 @@ internal sealed class PeerToPeerUtil(ILogger<PeerToPeerUtil> logger) : IAsyncDis
             if (bytesReceived is 48)
             {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-#pragma warning disable IDE0058 // Expression value is never used
-                ReceiveAsync(client, buffer, remoteSocketAddress, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-#pragma warning restore IDE0058 // Expression value is never used
+                _ = ReceiveAsync(client, buffer, remoteSocketAddress, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
         }

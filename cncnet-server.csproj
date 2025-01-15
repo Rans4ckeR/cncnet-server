@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <Title>CnCNet Server</Title>
     <Product>CnCNet RS Server</Product>
-    <Copyright>Copyright © 2020-2024</Copyright>
+    <Copyright>Copyright © 2020-2025</Copyright>
     <RootNamespace>CnCNetServer</RootNamespace>
     <AssemblyName>cncnet-server</AssemblyName>
     <Nullable>enable</Nullable>
@@ -32,43 +32,43 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.Abstractions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageReference Include="System.CommandLine.Hosting" Version="0.4.0-alpha.22272.1" />
     <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.0" />
-    <PackageReference Include="System.Diagnostics.EventLog" Version="9.0.0" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.0" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.0" />
-    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.1" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="9.0.1" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.1" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.1" />
+    <PackageReference Include="System.Text.Json" Version="9.0.1" />
   </ItemGroup>
 </Project>

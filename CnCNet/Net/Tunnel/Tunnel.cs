@@ -1,6 +1,5 @@
 ﻿using System.Buffers;
 using System.Collections.Concurrent;
-using System.Collections.Frozen;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -41,9 +40,7 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
         Client = new(SocketType.Dgram, ProtocolType.Udp);
         heartbeatTimer = new(TimeSpan.FromMilliseconds(100));
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-#pragma warning disable IDE0058 // Expression value is never used
-        StartHeartbeatAsync(cancellationToken);
-#pragma warning restore IDE0058 // Expression value is never used
+        _ = StartHeartbeatAsync(cancellationToken);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         Client.Bind(new IPEndPoint(IPAddress.IPv6Any, Port));
 
@@ -68,12 +65,10 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
             }
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-#pragma warning disable IDE0058 // Expression value is never used
-            DoReceiveAsync(
+            _ = DoReceiveAsync(
                 buffer[..receivedBytes],
                 remoteSocketAddress,
                 cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-#pragma warning restore IDE0058 // Expression value is never used
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
     }
@@ -101,7 +96,7 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return GetIpV6Addresses().FirstOrDefault();
 
-        var localIpV6Addresses = GetWindowsIpV6Addresses().ToFrozenSet();
+        ICollection<(IPAddress IpAddress, PrefixOrigin PrefixOrigin, SuffixOrigin SuffixOrigin)> localIpV6Addresses = [.. GetWindowsIpV6Addresses()];
         (IPAddress IpAddress, PrefixOrigin PrefixOrigin, SuffixOrigin SuffixOrigin) publicIpV6Address = localIpV6Addresses.FirstOrDefault(
             static q => q.PrefixOrigin is PrefixOrigin.RouterAdvertisement && q.SuffixOrigin is SuffixOrigin.LinkLayerAddress);
 
