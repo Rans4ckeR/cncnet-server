@@ -8,12 +8,12 @@ jobs:
     name: Calculate Version
     runs-on: windows-2025
     outputs:
-      AssemblySemVer: ${{ steps.gitversion.outputs.AssemblySemVer }}
-      AssemblySemFileVer: ${{ steps.gitversion.outputs.AssemblySemFileVer }}
-      InformationalVersion: ${{ steps.gitversion.outputs.InformationalVersion }}
-      SemVer: ${{ steps.gitversion.outputs.SemVer }}
-      PreReleaseTag: ${{ steps.gitversion.outputs.PreReleaseTag }}
-      Sha: ${{ steps.gitversion.outputs.Sha }}
+      AssemblySemVer: ${{ steps.gitversion.outputs.GitVersion_AssemblySemVer }}
+      AssemblySemFileVer: ${{ steps.gitversion.outputs.GitVersion_AssemblySemFileVer }}
+      InformationalVersion: ${{ steps.gitversion.outputs.GitVersion_InformationalVersion }}
+      SemVer: ${{ steps.gitversion.outputs.GitVersion_SemVer }}
+      PreReleaseTag: ${{ steps.gitversion.outputs.GitVersion_PreReleaseTag }}
+      Sha: ${{ steps.gitversion.outputs.GitVersion_Sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@main
@@ -24,6 +24,7 @@ jobs:
         with:
           versionSpec: '6.0.x'
       - name: Determine Version
+        id: gitversion
         uses: gittools/actions/gitversion/execute@main
   publish:
     name: Publish
