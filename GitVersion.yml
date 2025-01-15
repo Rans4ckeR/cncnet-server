@@ -1,9 +1,4 @@
+workflow: TrunkBased/preview1
 branches:
-  rs:
+  main:
     regex: ^rs$
-    
-    mode: ContinuousDelivery
-    increment: Patch
-    is-mainline: true
-    source-branches: [ 'master' ]
-    tag: ''
