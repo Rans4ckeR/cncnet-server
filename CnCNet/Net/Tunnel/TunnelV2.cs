@@ -46,7 +46,7 @@ internal sealed class TunnelV2(ILogger<TunnelV2> logger, IOptions<ServiceOptions
     {
         int clients = base.CleanupConnections();
 
-        ConnectionCounter!.Clear();
+        ConnectionCounter.Clear();
 
         return clients;
     }
@@ -82,7 +82,7 @@ internal sealed class TunnelV2(ILogger<TunnelV2> logger, IOptions<ServiceOptions
         if (!HandleSender(senderId, socketAddress, out TunnelClient? sender))
             return ValueTask.CompletedTask;
 
-        if (Mappings!.TryGetValue(receiverId, out TunnelClient? receiver))
+        if (Mappings.TryGetValue(receiverId, out TunnelClient? receiver))
             return ForwardPacketAsync(senderId, receiverId, buffer, sender!, receiver, cancellationToken);
 
         if (Logger.IsEnabled(LogLevel.Debug))
@@ -128,7 +128,7 @@ internal sealed class TunnelV2(ILogger<TunnelV2> logger, IOptions<ServiceOptions
 
     private bool HandleSender(uint senderId, SocketAddress socketAddress, out TunnelClient? sender)
     {
-        if (!Mappings!.TryGetValue(senderId, out sender))
+        if (!Mappings.TryGetValue(senderId, out sender))
         {
             if (Logger.IsEnabled(LogLevel.Debug))
                 Logger.LogDebug(FormattableString.Invariant($"V{Version} client {socketAddress} sender mapping {senderId} not found."));
@@ -201,7 +201,7 @@ internal sealed class TunnelV2(ILogger<TunnelV2> logger, IOptions<ServiceOptions
         if (!IsNewConnectionAllowed(request.HttpContext.Connection.RemoteIpAddress!))
             return Results.StatusCode((int)HttpStatusCode.TooManyRequests);
 
-        int mappingCount = Mappings!.Count;
+        int mappingCount = Mappings.Count;
         string status = FormattableString.Invariant($"{ServiceOptions.Value.MaxClients - mappingCount} slots free.") +
                         FormattableString.Invariant($"\n{mappingCount} slots in use.\n");
 
@@ -218,7 +218,7 @@ internal sealed class TunnelV2(ILogger<TunnelV2> logger, IOptions<ServiceOptions
 
         var clientIds = new List<int>(clients.Value);
 
-        if (Mappings!.Count + clients <= ServiceOptions.Value.MaxClients)
+        if (Mappings.Count + clients <= ServiceOptions.Value.MaxClients)
         {
             if (Logger.IsEnabled(LogLevel.Information))
             {
@@ -267,7 +267,7 @@ internal sealed class TunnelV2(ILogger<TunnelV2> logger, IOptions<ServiceOptions
 
     private bool IsNewConnectionAllowed(IPAddress address)
     {
-        if (ConnectionCounter!.Count >= MaxRequestsGlobal)
+        if (ConnectionCounter.Count >= MaxRequestsGlobal)
             return false;
 
         int hashCode = address.GetHashCode();

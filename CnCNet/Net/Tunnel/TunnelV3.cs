@@ -42,7 +42,7 @@ internal sealed class TunnelV3(ILogger<TunnelV3> logger, IOptions<ServiceOptions
     {
         int hashCode = tunnelClient.RemoteSocketAddress!.GetHashCode();
 
-        if (--ConnectionCounter![hashCode] <= 0)
+        if (--ConnectionCounter[hashCode] <= 0)
             _ = ConnectionCounter.Remove(hashCode, out _);
     }
 
@@ -83,7 +83,7 @@ internal sealed class TunnelV3(ILogger<TunnelV3> logger, IOptions<ServiceOptions
     protected override ValueTask HandlePacketAsync(
         uint senderId, uint receiverId, ReadOnlyMemory<byte> buffer, SocketAddress socketAddress, CancellationToken cancellationToken)
     {
-        if (Mappings!.TryGetValue(senderId, out TunnelClient? sender))
+        if (Mappings.TryGetValue(senderId, out TunnelClient? sender))
         {
             if (!HandleExistingClient(socketAddress, sender))
                 return ValueTask.CompletedTask;
@@ -129,8 +129,7 @@ internal sealed class TunnelV3(ILogger<TunnelV3> logger, IOptions<ServiceOptions
     {
         TunnelClient sender = new(ServiceOptions.Value.ClientTimeout, socketAddress);
 
-        if (Mappings!.Count < ServiceOptions.Value.MaxClients && !MaintenanceModeEnabled
-            && IsNewConnectionAllowed(socketAddress) && Mappings.TryAdd(senderId, sender))
+        if (Mappings.Count < ServiceOptions.Value.MaxClients && !MaintenanceModeEnabled && IsNewConnectionAllowed(socketAddress) && Mappings.TryAdd(senderId, sender))
         {
             if (Logger.IsEnabled(LogLevel.Information))
                 Logger.LogInfo(FormattableString.Invariant($"New V{Version} client from {sender.RemoteIpEndPoint}."));
@@ -138,7 +137,7 @@ internal sealed class TunnelV3(ILogger<TunnelV3> logger, IOptions<ServiceOptions
             if (Logger.IsEnabled(LogLevel.Debug))
             {
                 Logger.LogDebug(
-                    FormattableString.Invariant($"{ConnectionCounter!.Values.Sum()} clients from ") +
+                    FormattableString.Invariant($"{ConnectionCounter.Values.Sum()} clients from ") +
                     FormattableString.Invariant($"{ConnectionCounter.Count} IPs."));
             }
         }
@@ -164,7 +163,7 @@ internal sealed class TunnelV3(ILogger<TunnelV3> logger, IOptions<ServiceOptions
                 if (Logger.IsEnabled(LogLevel.Debug))
                 {
                     Logger.LogDebug(
-                        FormattableString.Invariant($"{Mappings!.Count} clients from ") +
+                        FormattableString.Invariant($"{Mappings.Count} clients from ") +
                         FormattableString.Invariant($"{Mappings.Values.Select(static q => q.RemoteIpEndPoint)
                             .Where(static q => q is not null).Distinct().Count()} IPs."));
                 }
@@ -191,7 +190,7 @@ internal sealed class TunnelV3(ILogger<TunnelV3> logger, IOptions<ServiceOptions
     {
         int hashCode = newSocketAddress.GetHashCode();
 
-        if (ConnectionCounter!.TryGetValue(hashCode, out int count) && count >= ServiceOptions.Value.IpLimit)
+        if (ConnectionCounter.TryGetValue(hashCode, out int count) && count >= ServiceOptions.Value.IpLimit)
             return false;
 
         if (oldSocketAddress is null)

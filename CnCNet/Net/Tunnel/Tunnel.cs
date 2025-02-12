@@ -12,7 +12,7 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
     private const int PingRequestPacketSize = 50;
     private const int PingResponsePacketSize = 12;
 
-    private readonly ConcurrentDictionary<int, int>? pingCounter = new();
+    private readonly ConcurrentDictionary<int, int> pingCounter = new();
 
     private PeriodicTimer? heartbeatTimer;
     private IPAddress? secondaryIpAddress;
@@ -29,9 +29,9 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
 
     protected bool MaintenanceModeEnabled { get; set; }
 
-    protected ConcurrentDictionary<int, int>? ConnectionCounter { get; } = new();
+    protected ConcurrentDictionary<int, int> ConnectionCounter { get; } = new();
 
-    protected ConcurrentDictionary<uint, TunnelClient>? Mappings { get; } = new();
+    protected ConcurrentDictionary<uint, TunnelClient> Mappings { get; } = new();
 
     protected Socket? Client { get; private set; }
 
@@ -167,13 +167,13 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
                 {
                     Logger.LogDebug(
                         FormattableString.Invariant($"V{Version} client {socketAddress} replying to ping ") +
-                        FormattableString.Invariant($"({pingCounter!.Count}/{ServiceOptions.Value.MaxPingsGlobal})."));
+                        FormattableString.Invariant($"({pingCounter.Count}/{ServiceOptions.Value.MaxPingsGlobal})."));
                 }
                 else if (Logger.IsEnabled(LogLevel.Trace))
                 {
                     Logger.LogTrace(
                         FormattableString.Invariant($"V{Version} client {socketAddress} replying to ping ") +
-                        FormattableString.Invariant($"({pingCounter!.Count}/{ServiceOptions.Value.MaxPingsGlobal}):") +
+                        FormattableString.Invariant($"({pingCounter.Count}/{ServiceOptions.Value.MaxPingsGlobal}):") +
                         FormattableString.Invariant($" {Convert.ToHexString(buffer.Span[..PingResponsePacketSize])}."));
                 }
 
@@ -267,7 +267,7 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
 
     private bool IsPingLimitReached(SocketAddress socketAddress)
     {
-        if (pingCounter!.Count >= ServiceOptions.Value.MaxPingsGlobal)
+        if (pingCounter.Count >= ServiceOptions.Value.MaxPingsGlobal)
             return true;
 
         int hashCode = socketAddress.GetHashCode();
@@ -321,10 +321,10 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
     private int CleanupConnections()
 #endif
     {
-        foreach (KeyValuePair<uint, TunnelClient> mapping in Mappings!.Where(static x => x.Value.TimedOut))
+        foreach (KeyValuePair<uint, TunnelClient> mapping in Mappings.Where(static x => x.Value.TimedOut))
         {
             CleanupConnection(mapping.Value);
-            _ = Mappings!.Remove(mapping.Key, out _);
+            _ = Mappings.Remove(mapping.Key, out _);
 
             if (Logger.IsEnabled(LogLevel.Information))
             {
@@ -336,13 +336,13 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
             if (Logger.IsEnabled(LogLevel.Debug))
             {
                 Logger.LogDebug(
-                    FormattableString.Invariant($"{Mappings!.Count} clients from {Mappings.Values
+                    FormattableString.Invariant($"{Mappings.Count} clients from {Mappings.Values
                         .Select(static q => q.RemoteSocketAddress).Where(static q => q is not null).Distinct().Count()} IPs."));
             }
         }
 
-        pingCounter!.Clear();
+        pingCounter.Clear();
 
-        return Mappings!.Count;
+        return Mappings.Count;
     }
 }

@@ -29,9 +29,9 @@ internal sealed class PeerToPeerUtil(ILogger<PeerToPeerUtil> logger) : IAsyncDis
         return ValueTask.CompletedTask;
     }
 
-    private static bool IsInvalidRemoteIpEndPoint(IPEndPoint remoteEp)
-        => IPAddress.IsLoopback(remoteEp.Address) || remoteEp.Address.Equals(IPAddress.Broadcast)
-            || remoteEp.Address.Equals(IPAddress.Any) || remoteEp.Address.Equals(IPAddress.IPv6Any) || remoteEp.Port is 0;
+    private static bool IsInvalidRemoteIpEndPoint(IPEndPoint remoteEp) =>
+        IPAddress.IsLoopback(remoteEp.Address) || remoteEp.Address.Equals(IPAddress.Broadcast) ||
+        remoteEp.Address.Equals(IPAddress.Any) || remoteEp.Address.Equals(IPAddress.IPv6Any) || remoteEp.Port is 0;
 
     private async Task ResetConnectionCounterAsync(CancellationToken cancellationToken)
     {
