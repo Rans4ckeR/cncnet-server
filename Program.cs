@@ -1,11 +1,8 @@
-﻿using System.CommandLine.Builder;
+﻿using System.CommandLine;
 using System.CommandLine.Hosting;
-using System.CommandLine.Parsing;
 using CnCNetServer;
-using Microsoft.Extensions.DependencyInjection;
 
-return await new CommandLineBuilder(RootCommandBuilder.Build())
-    .UseDefaults()
+return await new CommandLineConfiguration(RootCommandBuilder.Build())
     .UseHost(Host.CreateDefaultBuilder, static hostBuilder =>
         hostBuilder
             .ConfigureServices(static services =>
@@ -28,6 +25,5 @@ return await new CommandLineBuilder(RootCommandBuilder.Build())
                     .SetHandlerLifetime(Timeout.InfiniteTimeSpan);
             })
             .ConfigureLogging(Startup.ConfigureLogging))
-    .Build()
     .InvokeAsync(args)
     .ConfigureAwait(ConfigureAwaitOptions.None);

@@ -1,96 +1,67 @@
 ﻿using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
+using System.CommandLine.Hosting;
 using System.CommandLine.Parsing;
 
 namespace CnCNetServer;
 
 internal static class RootCommandBuilder
 {
-    private static readonly string[] NameOptionAliases = ["--name", "--n"];
-    private static readonly string[] MaxClientsOptionAliases = ["--maxclients", "--m"];
-    private static readonly string[] AddressLimitOptionAliases = ["--iplimit", "--i"];
-    private static readonly string[] TunnelPortOptionAliases = ["--tunnelport", "--p"];
-#if EnableLegacyVersion
-    private static readonly string[] TunnelV2PortOptionAliases = ["--tunnelv2port", "--p2"];
-#endif
-    private static readonly string[] AnnounceIpV6OptionAliases = ["--announceipv6", "--6"];
-    private static readonly string[] AnnounceIpV4OptionAliases = ["--announceipv4", "--4"];
-    private static readonly string[] MaxPacketSizeOptionAliases = ["--maxpacketsize", "--mps"];
-    private static readonly string[] MaxPingsGlobalOptionAliases = ["--maxpingsglobal", "--mpg"];
-    private static readonly string[] MaxPingsPerIpOptionAliases = ["--maxpingsperip", "--mpi"];
-    private static readonly string[] MasterAnnounceIntervalOptionAliases = ["--masterannounceinterval", "--ai"];
-    private static readonly string[] ClientTimeoutOptionAliases = ["--clienttimeout", "--c"];
-    private static readonly string[] NoMasterAnnounceAliases = ["--nomasterannounce", "--nm"];
-    private static readonly string[] MasterPasswordAliases = ["--masterpassword", "--masp"];
-    private static readonly string[] MaintenancePasswordAliases = ["--maintenancepassword", "--maip"];
-    private static readonly string[] MasterServerUrlAliases = ["--masterserverurl", "--mu"];
-    private static readonly string[] NoPeerToPeerAliases = ["--nopeertopeer", "--np"];
-    private static readonly string[] TunnelV3EnabledAliases = ["--tunnelv3enabled", "--3"];
-#if EnableLegacyVersion
-    private static readonly string[] TunnelV2EnabledAliases = ["--tunnelv2enabled", "--2"];
-#endif
-    private static readonly string[] ServerLogLevelAliases = ["--serverloglevel", "--sel"];
-    private static readonly string[] SystemLogLevelAliases = ["--systemloglevel", "--syl"];
-#if EnableLegacyVersion
-    private static readonly string[] TunnelV2HttpsAliases = ["--tunnelv2https", "--h"];
-#endif
-
     public static RootCommand Build()
     {
-        var nameOption = new Option<string>(NameOptionAliases, "Name of the server") { IsRequired = true };
-        var maxClientsOption = new Option<int>(MaxClientsOptionAliases, static () => 200, "Maximum clients allowed on the tunnel server");
-        var addressLimitOption = new Option<int>(AddressLimitOptionAliases, static () => 8, "Maximum clients allowed per IP address");
-        var tunnelPortOption = new Option<int>(TunnelPortOptionAliases, static () => 50001, "Port used for the V3 tunnel server");
+        var nameOption = new Option<string>("--name", "-n") { Description = "Name of the server", Required = true };
+        var maxClientsOption = new Option<int>("--max-clients", "-m") { Description = "Maximum clients allowed on the tunnel server", DefaultValueFactory = static _ => 200 };
+        var addressLimitOption = new Option<int>("--ip-limit", "-i") { Description = "Maximum clients allowed per IP address", DefaultValueFactory = static _ => 8 };
+        var tunnelPortOption = new Option<int>("--tunnel-port", "-p") { Description = "Port used for the V3 tunnel server", DefaultValueFactory = static _ => 50001 };
 #if EnableLegacyVersion
-        var tunnelV2PortOption = new Option<int>(TunnelV2PortOptionAliases, static () => 50000, "Port used for the V2 tunnel server");
+        var tunnelV2PortOption = new Option<int>("--tunnel-v2-port", "-p2") { Description = "Port used for the V2 tunnel server", DefaultValueFactory = static _ => 50000 };
 #endif
-        var announceIpV6Option = new Option<bool>(AnnounceIpV6OptionAliases, static () => true, "Announce IPv6 address to master server");
-        var announceIpV4Option = new Option<bool>(AnnounceIpV4OptionAliases, static () => true, "Announce IPv4 address to master server");
-        var maxPacketSizeOption = new Option<int>(MaxPacketSizeOptionAliases, static () => 2048, "Maximum accepted packet size");
-        var maxPingsGlobalOption = new Option<ushort>(MaxPingsGlobalOptionAliases, static () => 1024, "Maximum accepted ping requests globally");
-        var maxPingsPerIpOption = new Option<ushort>(MaxPingsPerIpOptionAliases, static () => 20, "Maximum accepted ping requests per IP");
-        var masterAnnounceIntervalOption = new Option<ushort>(MasterAnnounceIntervalOptionAliases, static () => 60, "Master server announce interval in seconds");
-        var clientTimeoutOption = new Option<int>(ClientTimeoutOptionAliases, static () => 60, "Client timeout in seconds");
+        var announceIpV6Option = new Option<bool>("--announce-ipv6", "-6") { Description = "Announce IPv6 address to master server", DefaultValueFactory = static _ => true };
+        var announceIpV4Option = new Option<bool>("--announce-ipv4", "-4") { Description = "Announce IPv4 address to master server", DefaultValueFactory = static _ => true };
+        var maxPacketSizeOption = new Option<int>("--max-packet-size", "-mps") { Description = "Maximum accepted packet size", DefaultValueFactory = static _ => 2048 };
+        var maxPingsGlobalOption = new Option<ushort>("--max-pings-global", "-mpg") { Description = "Maximum accepted ping requests globally", DefaultValueFactory = static _ => 1024 };
+        var maxPingsPerIpOption = new Option<ushort>("--max-pings-per-ip", "-mpi") { Description = "Maximum accepted ping requests per IP", DefaultValueFactory = static _ => 20 };
+        var masterAnnounceIntervalOption = new Option<ushort>("-master-announce-interval", "-ai") { Description = "Master server announce interval in seconds", DefaultValueFactory = static _ => 60 };
+        var clientTimeoutOption = new Option<int>("--client-timeout", "-c") { Description = "Client timeout in seconds", DefaultValueFactory = static _ => 60 };
 
-        nameOption.AddValidator(static result =>
+        nameOption.Validators.Add(static result =>
         {
-            if (result.GetValueOrDefault<string>()!.Any(static q => q is ';'))
-                result.ErrorMessage = $"{nameof(ServiceOptions.Name)} cannot contain the character ;";
+            if (result.GetValueOrDefault<string>().Any(static q => q is ';'))
+                result.AddError(FormattableString.Invariant($"{nameof(ServiceOptions.Name)} cannot contain the character ;"));
         });
-        maxClientsOption.AddValidator(static result =>
+        maxClientsOption.Validators.Add(static result =>
         {
             const int minMaxClients = 2;
 
             if (result.GetValueOrDefault<int>() < minMaxClients)
-                result.ErrorMessage = $"{nameof(ServiceOptions.MaxClients)} minimum is {minMaxClients}";
+                result.AddError(FormattableString.Invariant($"{nameof(ServiceOptions.MaxClients)} minimum is {minMaxClients}"));
         });
-        addressLimitOption.AddValidator(static result =>
+        addressLimitOption.Validators.Add(static result =>
         {
             const int minIpLimit = 1;
 
             if (result.GetValueOrDefault<int>() < minIpLimit)
-                result.ErrorMessage = $"{nameof(ServiceOptions.IpLimit)} minimum is {minIpLimit}";
+                result.AddError(FormattableString.Invariant($"{nameof(ServiceOptions.IpLimit)} minimum is {minIpLimit}"));
         });
-        maxPacketSizeOption.AddValidator(static result =>
+        maxPacketSizeOption.Validators.Add(static result =>
         {
             const int maxPacketSizeLimit = 512;
 
             if (result.GetValueOrDefault<int>() < maxPacketSizeLimit)
-                result.ErrorMessage = $"{nameof(ServiceOptions.MaxPacketSize)} minimum is {maxPacketSizeLimit}";
+                result.AddError(FormattableString.Invariant($"{nameof(ServiceOptions.MaxPacketSize)} minimum is {maxPacketSizeLimit}"));
         });
-        clientTimeoutOption.AddValidator(static result =>
+        clientTimeoutOption.Validators.Add(static result =>
         {
             const int minClientTimeout = 30;
 
             if (result.GetValueOrDefault<int>() < minClientTimeout)
-                result.ErrorMessage = $"{nameof(ServiceOptions.ClientTimeout)} minimum is {minClientTimeout}";
+                result.AddError(FormattableString.Invariant($"{nameof(ServiceOptions.ClientTimeout)} minimum is {minClientTimeout}"));
         });
-        tunnelPortOption.AddValidator(ValidatePort);
+        tunnelPortOption.Validators.Add(ValidatePort);
 #if EnableLegacyVersion
-        tunnelV2PortOption.AddValidator(ValidatePort);
+        tunnelV2PortOption.Validators.Add(ValidatePort);
 #endif
-        announceIpV6Option.AddValidator(static result => ValidateIpAnnounce(result, Socket.OSSupportsIPv6));
-        announceIpV4Option.AddValidator(static result => ValidateIpAnnounce(result, Socket.OSSupportsIPv4));
+        announceIpV6Option.Validators.Add(static result => ValidateIpAnnounce(result, Socket.OSSupportsIPv6));
+        announceIpV4Option.Validators.Add(static result => ValidateIpAnnounce(result, Socket.OSSupportsIPv4));
 
         var rootCommand = new RootCommand("CnCNet tunnel server")
         {
@@ -100,22 +71,22 @@ internal static class RootCommandBuilder
             tunnelV2PortOption,
 #endif
             maxClientsOption,
-            new Option<bool>(NoMasterAnnounceAliases, static () => false, "Don't register to master"),
-            new Option<string?>(MasterPasswordAliases, static () => null, "Master password"),
-            new Option<string?>(MaintenancePasswordAliases, static () => null, "Maintenance password"),
-            new Option<Uri>(MasterServerUrlAliases, static () => new($"{Uri.UriSchemeHttps}{Uri.SchemeDelimiter}cncnet.org/api/v1/master-announce"), "Master server URL"),
+            new Option<bool>("--no-master-announce", "-nm") { Description = "Don't register to master", DefaultValueFactory = static _ => false },
+            new Option<string?>("--master-password", "-masp") { Description = "Master password", DefaultValueFactory = static _ => null },
+            new Option<string?>("--maintenance-password", "-maip") { Description = "Maintenance password", DefaultValueFactory = static _ => null },
+            new Option<Uri>("--master-server-url", "-mu") { Description = "Master server URL", DefaultValueFactory = static _ => new(FormattableString.Invariant($"{Uri.UriSchemeHttps}{Uri.SchemeDelimiter}cncnet.org/api/v1/master-announce")) },
             addressLimitOption,
-            new Option<bool>(NoPeerToPeerAliases, static () => false, "Disable STUN NAT traversal server (UDP 8054 & 3478)"),
-            new Option<bool>(TunnelV3EnabledAliases, static () => true, "Start a V3 tunnel server"),
+            new Option<bool>("--no-peer-to-peer", "-np") { Description = "Disable STUN NAT traversal server (UDP 8054 & 3478)", DefaultValueFactory = static _ => false },
+            new Option<bool>("--tunnel-v3-enabled", "-3") { Description = "Start a V3 tunnel server", DefaultValueFactory = static _ => true },
 #if EnableLegacyVersion
-            new Option<bool>(TunnelV2EnabledAliases, static () => true, "Start a V2 tunnel server"),
+            new Option<bool>("--tunnel-v2-enabled", "-2") { Description = "Start a V2 tunnel server", DefaultValueFactory = static _ => true },
 #endif
-            new Option<LogLevel>(ServerLogLevelAliases, static () => LogLevel.Warning, "CnCNet server messages log level"),
-            new Option<LogLevel>(SystemLogLevelAliases, static () => LogLevel.Warning, "Low level system messages log level"),
+            new Option<LogLevel>("--server-log-level", "-sel") { Description = "CnCNet server messages log level", DefaultValueFactory = static _ => LogLevel.Warning },
+            new Option<LogLevel>("--system-log-level", "-syl") { Description = "Low level system messages log level", DefaultValueFactory = static _ => LogLevel.Warning },
             announceIpV6Option,
             announceIpV4Option,
 #if EnableLegacyVersion
-            new Option<bool>(TunnelV2HttpsAliases, static () => false, $"Use {Uri.UriSchemeHttps} Tunnel V2 web server"),
+            new Option<bool>("--tunnel-v2-https", "-h") { Description = FormattableString.Invariant($"Use {Uri.UriSchemeHttps} Tunnel V2 web server"), DefaultValueFactory = static _ => false },
 #endif
             maxPacketSizeOption,
             maxPingsGlobalOption,
@@ -124,7 +95,7 @@ internal static class RootCommandBuilder
             clientTimeoutOption
         };
 
-        rootCommand.Handler = CommandHandler.Create<IHost>(static host => host.WaitForShutdownAsync());
+        rootCommand.SetAction(static (parseResult, cancellationToken) => parseResult.GetHost().WaitForShutdownAsync(cancellationToken));
 
         return rootCommand;
     }
@@ -135,12 +106,12 @@ internal static class RootCommandBuilder
         const int maxPort = 65534;
 
         if (result.GetValueOrDefault<int>() is < minPort or > maxPort)
-            result.ErrorMessage = $"{result.Option.Name} minimum is {minPort} and maximum is {maxPort}";
+            result.AddError(FormattableString.Invariant($"{result.Option.Name} minimum is {minPort} and maximum is {maxPort}"));
     }
 
     private static void ValidateIpAnnounce(OptionResult result, bool isSupported)
     {
         if (result.GetValueOrDefault<bool>() && !isSupported)
-            result.ErrorMessage = $"{result.Option.Name} is not supported on this system";
+            result.AddError(FormattableString.Invariant($"{result.Option.Name} is not supported on this system"));
     }
 }

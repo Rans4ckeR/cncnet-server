@@ -12,6 +12,7 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
     private const int PingRequestPacketSize = 50;
     private const int PingResponsePacketSize = 12;
 
+    private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
     private readonly ConcurrentDictionary<int, int> pingCounter = new();
 
     private PeriodicTimer? heartbeatTimer;

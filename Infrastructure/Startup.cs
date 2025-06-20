@@ -1,7 +1,5 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Hosting;
-using System.CommandLine.Invocation;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CnCNetServer;
 
@@ -45,12 +43,9 @@ internal static class Startup
 
     public static void ConfigureLogging(HostBuilderContext context, ILoggingBuilder builder)
     {
-        InvocationContext invocationContext = context.GetInvocationContext();
-        IReadOnlyList<Option> options = invocationContext.ParseResult.RootCommandResult.Command.Options;
-        Option serverLogLevelOption = options.Single(static q => q.Name.Equals(nameof(ServiceOptions.ServerLogLevel), StringComparison.OrdinalIgnoreCase));
-        Option systemLogLevelOption = options.Single(static q => q.Name.Equals(nameof(ServiceOptions.SystemLogLevel), StringComparison.OrdinalIgnoreCase));
-        var serverLogLevel = (LogLevel)invocationContext.ParseResult.GetValueForOption(serverLogLevelOption)!;
-        var systemLogLevel = (LogLevel)invocationContext.ParseResult.GetValueForOption(systemLogLevelOption)!;
+        ParseResult parseResult = context.GetParseResult();
+        LogLevel serverLogLevel = parseResult.GetRequiredValue<LogLevel>("--server-log-level");
+        LogLevel systemLogLevel = parseResult.GetRequiredValue<LogLevel>("--system-log-level");
 
         builder.ConfigureLogging(serverLogLevel, systemLogLevel);
     }

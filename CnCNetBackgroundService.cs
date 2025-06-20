@@ -1,4 +1,4 @@
-﻿using System.CommandLine.Parsing;
+﻿using System.CommandLine;
 
 namespace CnCNetServer;
 
@@ -19,8 +19,15 @@ internal sealed class CnCNetBackgroundService(
     private const int StunPort2 = 8054;
     private const int ErrorExitCode = 1;
 
-    private bool started;
-    private bool stopping;
+    private readonly ILogger logger = logger;
+    private readonly IOptions<ServiceOptions> options = options;
+    private readonly TunnelV3 tunnelV3 = tunnelV3;
+#if EnableLegacyVersion
+    private readonly TunnelV2 tunnelV2 = tunnelV2;
+#endif
+    private readonly PeerToPeerUtil peerToPeerUtil1 = peerToPeerUtil1;
+    private readonly PeerToPeerUtil peerToPeerUtil2 = peerToPeerUtil2;
+    private readonly ParseResult parseResult = parseResult;
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -36,8 +43,6 @@ internal sealed class CnCNetBackgroundService(
 
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInfo(FormattableString.Invariant($"Server {options.Value.Name} started."));
-
-            started = true;
         }
         catch (Exception ex)
         {
@@ -51,11 +56,6 @@ internal sealed class CnCNetBackgroundService(
     {
         try
         {
-            if (stopping || !started)
-                return;
-
-            stopping = true;
-
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInfo(FormattableString.Invariant($"Server {options.Value.Name} stopping."));
 

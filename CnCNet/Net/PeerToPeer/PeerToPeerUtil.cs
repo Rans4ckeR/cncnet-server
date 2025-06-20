@@ -10,6 +10,7 @@ internal sealed class PeerToPeerUtil(ILogger<PeerToPeerUtil> logger) : IAsyncDis
     private const int MaxConnectionsGlobal = 5000; // Max amount of different ips sending requests during one CounterResetInterval period
     private const short StunId = 26262;
 
+    private readonly ILogger logger = logger;
     private readonly ConcurrentDictionary<int, int> connectionCounter = new();
     private readonly PeriodicTimer connectionCounterTimer = new(TimeSpan.FromSeconds(CounterResetInterval));
 

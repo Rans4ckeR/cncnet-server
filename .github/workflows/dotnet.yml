@@ -22,13 +22,13 @@ jobs:
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@main
         with:
-          versionSpec: '6.0.x'
+          versionSpec: '6.x.x'
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@main
   publish:
     name: Publish
-    runs-on: windows-latest
+    runs-on: windows-2025
     needs: calculate-version
     env:
       AssemblySemVer: ${{ needs.calculate-version.outputs.AssemblySemVer }}
@@ -69,7 +69,7 @@ jobs:
       PreReleaseTag: ${{ needs.calculate-version.outputs.PreReleaseTag }}
       SemVer: ${{ needs.calculate-version.outputs.SemVer }}
       Sha: ${{ needs.calculate-version.outputs.Sha }}
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
       - name: Checkout
         uses: actions/checkout@main
