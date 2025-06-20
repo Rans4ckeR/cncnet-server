@@ -1,6 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <OutputType>Exe</OutputType>
     <Title>CnCNet Server</Title>
     <Product>CnCNet RS Server</Product>
     <Copyright>Copyright © 2020-2025</Copyright>
