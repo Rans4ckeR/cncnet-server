@@ -23,23 +23,26 @@ internal sealed class TunnelV2(ILogger<TunnelV2> logger, IOptions<ServiceOptions
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
         string httpScheme = ServiceOptions.Value.TunnelV2Https ? Uri.UriSchemeHttps : Uri.UriSchemeHttp;
 
-        builder.Logging.ConfigureLogging(ServiceOptions.Value.ServerLogLevel, ServiceOptions.Value.SystemLogLevel);
+        _ = builder.Logging.ConfigureLogging(ServiceOptions.Value.ServerLogLevel, ServiceOptions.Value.SystemLogLevel);
         _ = builder.WebHost.UseUrls(FormattableString.Invariant($"{httpScheme}{Uri.SchemeDelimiter}*:{ServiceOptions.Value.TunnelV2Port}"));
 
         WebApplication app = builder.Build();
 
-        _ = app.MapGet("/maintenance", HandleMaintenanceRequest);
-        _ = app.MapGet("/maintenance/{requestMaintenancePassword}", HandleMaintenanceRequest);
-        _ = app.MapGet("/status", HandleStatusRequest);
-        _ = app.MapGet("/request", HandleRequestRequest);
-
-        if (Logger.IsEnabled(LogLevel.Information))
+        await using (app.ConfigureAwait(false))
         {
-            Logger.LogInfo(FormattableString.Invariant(
-                $"V{Version} Tunnel {httpScheme} server started on port {ServiceOptions.Value.TunnelV2Port}."));
-        }
+            _ = app.MapGet("/maintenance", HandleMaintenanceRequest);
+            _ = app.MapGet("/maintenance/{requestMaintenancePassword}", HandleMaintenanceRequest);
+            _ = app.MapGet("/status", HandleStatusRequest);
+            _ = app.MapGet("/request", HandleRequestRequest);
 
-        await app.RunAsync(cancellationToken).ConfigureAwait(false);
+            if (Logger.IsEnabled(LogLevel.Information))
+            {
+                Logger.LogInfo(FormattableString.Invariant(
+                    $"V{Version} Tunnel {httpScheme} server started on port {ServiceOptions.Value.TunnelV2Port}."));
+            }
+
+            await app.RunAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        }
     }
 
     protected override int CleanupConnections()

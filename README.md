@@ -1,7 +1,7 @@
 
 # CnCNet Tunnel Server
 
-* .NET 9
+* .NET 10
 * Cross platform (Windows, Linux, Mac, ...)
 * No admin privileges required to run
 * Supports CnCNet V2 & V3 tunnel protocol
@@ -10,8 +10,8 @@
 
 ## How to run/install
 
-* The V3 version requires the [.NET Runtime 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0/runtime).
-* The V3+V2 version additionally requires the [ASP.NET Core Runtime 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0/runtime).
+* The V3 version requires the [.NET Runtime 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0/runtime).
+* The V3+V2 version additionally requires the [ASP.NET Core Runtime 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0/runtime).
 
 Make sure these ports are open/forwarded to the machine (default ports):
 
@@ -101,7 +101,7 @@ Start-Service CnCNetServer
 
 ```
 sudo apt-get update && \
-  sudo apt-get install -y aspnetcore-runtime-9.0
+  sudo apt-get install -y aspnetcore-runtime-10.0
 ```
 
 ```

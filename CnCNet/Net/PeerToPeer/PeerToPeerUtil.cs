@@ -83,7 +83,9 @@ internal sealed class PeerToPeerUtil(ILogger<PeerToPeerUtil> logger) : IAsyncDis
             if (bytesReceived is 48)
             {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+#pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
                 _ = ReceiveAsync(client, buffer, remoteSocketAddress, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+#pragma warning restore CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
         }

@@ -2,11 +2,10 @@
 
 namespace CnCNetServer;
 
+// ReSharper disable once SuggestBaseTypeForParameterInConstructor
 internal sealed class CnCNetBackgroundService(
     ILogger<CnCNetBackgroundService> logger,
     IOptions<ServiceOptions> options,
-
-    // ReSharper disable once SuggestBaseTypeForParameterInConstructor
     TunnelV3 tunnelV3,
 #if EnableLegacyVersion
     TunnelV2 tunnelV2,
@@ -21,12 +20,14 @@ internal sealed class CnCNetBackgroundService(
 
     private readonly ILogger logger = logger;
     private readonly IOptions<ServiceOptions> options = options;
+#pragma warning disable CA2213 // Disposable fields should be disposed
     private readonly TunnelV3 tunnelV3 = tunnelV3;
 #if EnableLegacyVersion
     private readonly TunnelV2 tunnelV2 = tunnelV2;
 #endif
     private readonly PeerToPeerUtil peerToPeerUtil1 = peerToPeerUtil1;
     private readonly PeerToPeerUtil peerToPeerUtil2 = peerToPeerUtil2;
+#pragma warning restore CA2213 // Disposable fields should be disposed
     private readonly ParseResult parseResult = parseResult;
 
     public override async Task StartAsync(CancellationToken cancellationToken)
