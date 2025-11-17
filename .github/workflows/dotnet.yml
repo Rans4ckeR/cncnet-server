@@ -25,8 +25,6 @@ jobs:
           versionSpec: '6.x.x'
       - name: Determine Version
         uses: gittools/actions/gitversion/execute@main
-        with:
-          buildNumberFormat: '$env.GitVersion_SemVer'
   publish:
     name: Publish
     runs-on: windows-2025
