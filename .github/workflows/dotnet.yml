@@ -20,11 +20,11 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install GitVersion
-        uses: gittools/actions/gitversion-setup@main
+        uses: gittools/actions/gitversion/setup@main
         with:
           versionSpec: '6.x.x'
       - name: Determine Version
-        uses: gittools/actions/gitversion-execute@main
+        uses: gittools/actions/gitversion/execute@main
         with:
           buildNumberFormat: '$env.GitVersion_SemVer'
   publish:
