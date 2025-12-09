@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+using System.Security.Cryptography;
 using System.Text;
 
 namespace CnCNetServer;

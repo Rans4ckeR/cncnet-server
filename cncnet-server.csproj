@@ -20,6 +20,7 @@
     <DefineConstants Condition="'$(Configuration.Contains(Debug))'">$(DefineConstants);DEBUG</DefineConstants>
     <DefineConstants Condition="'$(Configuration.Contains(V2AndV3))'">$(DefineConstants);EnableLegacyVersion</DefineConstants>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <NoWarn>$(NoWarn);CA1515</NoWarn>
   </PropertyGroup>
   <ItemGroup Condition="!$(DefineConstants.Contains('EnableLegacyVersion'))">
     <Compile Remove="CnCNet\Net\Tunnel\TunnelV2.cs" />
@@ -35,9 +36,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.0" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.1" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.1" />
   </ItemGroup>
 </Project>

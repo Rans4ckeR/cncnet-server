@@ -78,6 +78,14 @@ internal static class Startup
 
     private static void ConfigureOptions(ServiceOptions options, ParseResult parseResult)
     {
+        const int errorExitCode = 1;
+
+        if (parseResult.Errors.Count is not 0)
+        {
+            Console.Error.WriteLine(FormattableString.Invariant($"Error parsing command line arguments:{Environment.NewLine}{string.Join(Environment.NewLine, parseResult.Errors)}"));
+            Environment.Exit(errorExitCode);
+        }
+
         options.TunnelPort = parseResult.GetRequiredValue(RootCommandBuilder.TunnelPort);
         options.Name = parseResult.GetRequiredValue(RootCommandBuilder.Name);
         options.MaxClients = parseResult.GetRequiredValue(RootCommandBuilder.MaxClients);

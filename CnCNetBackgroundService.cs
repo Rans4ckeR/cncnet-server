@@ -1,4 +1,5 @@
-﻿using System.CommandLine;
+﻿#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+using System.CommandLine;
 
 namespace CnCNetServer;
 

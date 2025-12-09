@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+using System.Buffers;
 using System.Collections.Concurrent;
 
 namespace CnCNetServer;

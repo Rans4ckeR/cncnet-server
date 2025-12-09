@@ -1,4 +1,5 @@
-﻿namespace CnCNetServer;
+﻿#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+namespace CnCNetServer;
 
 internal sealed record ServiceOptions
 {
