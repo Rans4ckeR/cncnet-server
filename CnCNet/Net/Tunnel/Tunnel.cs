@@ -246,11 +246,11 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
             string responseContent = await httpResponseMessage.EnsureSuccessStatusCode().Content
                 .ReadAsStringAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
-            if (!"OK".Equals(responseContent, StringComparison.OrdinalIgnoreCase))
-                throw new MasterServerException(responseContent);
-
             if (Logger.IsEnabled(LogLevel.Information))
                 Logger.LogInfo(FormattableString.Invariant($"V{Version} Tunnel Heartbeat sent."));
+
+            if (!"OK".Equals(responseContent, StringComparison.OrdinalIgnoreCase) && Logger.IsEnabled(LogLevel.Error))
+                Logger.LogError(FormattableString.Invariant($"MasterServer error:{Environment.NewLine}{responseContent}"));
         }
         catch (HttpRequestException ex)
         {

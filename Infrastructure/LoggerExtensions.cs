@@ -14,8 +14,12 @@ internal static partial class LoggerExtensions
             return loggingBuilder.ConfigureLogging(serverLogLevel, systemLogLevel);
         }
 
+#if EnableLegacyVersion
         public ILoggingBuilder ConfigureLogging(LogLevel serverLogLevel, LogLevel systemLogLevel)
-            => loggingBuilder
+#else
+        private ILoggingBuilder ConfigureLogging(LogLevel serverLogLevel, LogLevel systemLogLevel)
+#endif
+        => loggingBuilder
                 .SetMinimumLevel(systemLogLevel)
                 .AddFilter(nameof(CnCNetServer), serverLogLevel);
     }
@@ -34,17 +38,20 @@ internal static partial class LoggerExtensions
         }
     }
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Trace, Message = "{message}")]
+    [LoggerMessage(EventId = 5, Level = LogLevel.Trace, Message = "{message}")]
     public static partial void LogTrace(this ILogger logger, string message);
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Debug, Message = "{message}")]
+    [LoggerMessage(EventId = 4, Level = LogLevel.Debug, Message = "{message}")]
     public static partial void LogDebug(this ILogger logger, string message);
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "{message}")]
+    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "{message}")]
     public static partial void LogInfo(this ILogger logger, string message);
 
-    [LoggerMessage(EventId = 1, Level = LogLevel.Warning, Message = "{message}")]
+    [LoggerMessage(EventId = 2, Level = LogLevel.Warning, Message = "{message}")]
     public static partial void LogWarning(this ILogger logger, string message);
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Error, Message = "{message}")]
+    public static partial void LogError(this ILogger logger, string message);
 
     [LoggerMessage(EventId = 0, Message = "{message}")]
     private static partial void LogException(this ILogger logger, string message, LogLevel logLevel);

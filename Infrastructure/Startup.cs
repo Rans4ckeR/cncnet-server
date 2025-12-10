@@ -78,12 +78,10 @@ internal static class Startup
 
     private static void ConfigureOptions(ServiceOptions options, ParseResult parseResult)
     {
-        const int errorExitCode = 1;
-
         if (parseResult.Errors.Count is not 0)
         {
-            Console.Error.WriteLine(FormattableString.Invariant($"Error parsing command line arguments:{Environment.NewLine}{string.Join(Environment.NewLine, parseResult.Errors)}"));
-            Environment.Exit(errorExitCode);
+            Console.Error.WriteLine(FormattableString.Invariant($"Invalid command line arguments:{Environment.NewLine}{string.Join(Environment.NewLine, parseResult.Errors)}"));
+            Environment.Exit(CnCNetBackgroundService.ErrorExitCode);
         }
 
         options.TunnelPort = parseResult.GetRequiredValue(RootCommandBuilder.TunnelPort);

@@ -86,6 +86,27 @@ internal static class RootCommandBuilder
             if (result.GetValueOrDefault<int>() < minClientTimeout)
                 result.AddError(FormattableString.Invariant($"{nameof(ClientTimeout)} minimum is {minClientTimeout}"));
         });
+        TunnelV3Enabled.Validators.Add(static tunnelV3EnabledResult =>
+        {
+            NoPeerToPeer.Validators.Add(noPeerToPeerResult =>
+#pragma warning disable format
+            {
+#if EnableLegacyVersion
+                TunnelV2Enabled.Validators.Add(tunnelV2EnabledResult =>
+                {
+                    bool tunnelEnabled = tunnelV3EnabledResult.GetValueOrDefault<bool>() || tunnelV2EnabledResult.GetValueOrDefault<bool>();
+#else
+                    bool tunnelEnabled = tunnelV3EnabledResult.GetValueOrDefault<bool>();
+#endif
+
+                    if (!tunnelEnabled && noPeerToPeerResult.GetValueOrDefault<bool>())
+                        noPeerToPeerResult.AddError("No tunnel or peer to peer enabled.");
+                });
+#pragma warning restore format
+#if EnableLegacyVersion
+            });
+#endif
+        });
         TunnelPort.Validators.Add(ValidatePort);
 #if EnableLegacyVersion
         TunnelV2Port.Validators.Add(ValidatePort);

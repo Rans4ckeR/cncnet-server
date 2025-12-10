@@ -1,6 +1,4 @@
 ﻿#pragma warning disable CA1812 // Avoid uninstantiated internal classes
-using System.CommandLine;
-
 namespace CnCNetServer;
 
 // ReSharper disable once SuggestBaseTypeForParameterInConstructor
@@ -12,12 +10,12 @@ internal sealed class CnCNetBackgroundService(
     TunnelV2 tunnelV2,
 #endif
     PeerToPeerUtil peerToPeerUtil1,
-    PeerToPeerUtil peerToPeerUtil2,
-    ParseResult parseResult) : BackgroundService
+    PeerToPeerUtil peerToPeerUtil2) : BackgroundService
 {
+    public const int ErrorExitCode = 1;
+
     private const int StunPort1 = 3478;
     private const int StunPort2 = 8054;
-    private const int ErrorExitCode = 1;
 
     private readonly ILogger logger = logger;
     private readonly IOptions<ServiceOptions> options = options;
@@ -29,15 +27,11 @@ internal sealed class CnCNetBackgroundService(
     private readonly PeerToPeerUtil peerToPeerUtil1 = peerToPeerUtil1;
     private readonly PeerToPeerUtil peerToPeerUtil2 = peerToPeerUtil2;
 #pragma warning restore CA2213 // Disposable fields should be disposed
-    private readonly ParseResult parseResult = parseResult;
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         try
         {
-            if (parseResult.Errors.Any())
-                return;
-
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInfo(FormattableString.Invariant($"Server {options.Value.Name} starting."));
 
@@ -78,18 +72,6 @@ internal sealed class CnCNetBackgroundService(
     {
         try
         {
-            if (options.Value is
-                {
-                    TunnelV3Enabled: false,
-#if EnableLegacyVersion
-                    TunnelV2Enabled: false,
-#endif
-                    NoPeerToPeer: true
-                })
-            {
-                throw new ConfigurationException("No tunnel or peer to peer enabled.");
-            }
-
             var tasks = new List<Task>();
 
             if (options.Value.TunnelV3Enabled)
