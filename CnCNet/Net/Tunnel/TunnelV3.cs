@@ -154,7 +154,7 @@ internal sealed class TunnelV3(ILogger<TunnelV3> logger, IOptions<ServiceOptions
     {
         if (!socketAddress.Equals(sender.RemoteSocketAddress))
         {
-            if (sender.TimedOut && !MaintenanceModeEnabled && IsNewConnectionAllowed(socketAddress, sender.RemoteSocketAddress!))
+            if (sender.TimedOut && !MaintenanceModeEnabled && IsNewConnectionAllowed(socketAddress, sender.RemoteSocketAddress))
             {
                 sender.RemoteSocketAddress = socketAddress;
 
