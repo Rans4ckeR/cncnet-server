@@ -29,7 +29,7 @@ internal sealed class TunnelV3(ILogger<TunnelV3> logger, IOptions<ServiceOptions
 
     public override ValueTask StartAsync(CancellationToken cancellationToken)
     {
-        if (ServiceOptions.Value.MaintenancePassword?.Length is not null and not 0)
+        if (!string.IsNullOrEmpty(ServiceOptions.Value.MaintenancePassword))
 #pragma warning disable CA5350 // Do Not Use Weak Cryptographic Algorithms
             maintenancePasswordSha1 = SHA1.HashData(Encoding.UTF8.GetBytes(ServiceOptions.Value.MaintenancePassword));
 #pragma warning restore CA5350 // Do Not Use Weak Cryptographic Algorithms
@@ -214,7 +214,7 @@ internal sealed class TunnelV3(ILogger<TunnelV3> logger, IOptions<ServiceOptions
     private void ExecuteCommand(TunnelCommand command, ReadOnlyMemory<byte> data, IPEndPoint endPoint)
     {
         if (TimeSpan.FromTicks(DateTime.UtcNow.Ticks - lastCommandTick).TotalSeconds < CommandRateLimitInSeconds
-            || maintenancePasswordSha1 is null || ServiceOptions.Value.MaintenancePassword!.Length is 0)
+            || maintenancePasswordSha1 is null || string.IsNullOrEmpty(ServiceOptions.Value.MaintenancePassword))
         {
             return;
         }
