@@ -177,8 +177,8 @@ internal sealed class TunnelV2(ILogger<TunnelV2> logger, IOptions<ServiceOptions
         if (!IsNewConnectionAllowed(request.HttpContext.Connection.RemoteIpAddress!))
             return Results.StatusCode((int)HttpStatusCode.TooManyRequests);
 
-        if (ServiceOptions.Value.MaintenancePassword!.Length is not 0
-            && ServiceOptions.Value.MaintenancePassword!.Equals(requestMaintenancePassword, StringComparison.Ordinal))
+        if (!string.IsNullOrEmpty(ServiceOptions.Value.MaintenancePassword)
+            && ServiceOptions.Value.MaintenancePassword.Equals(requestMaintenancePassword, StringComparison.Ordinal))
         {
             MaintenanceModeEnabled = true;
 
