@@ -1,4 +1,5 @@
 ﻿#pragma warning disable CA1812 // Avoid uninstantiated internal classes
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -234,13 +235,9 @@ internal sealed class TunnelV2(ILogger<TunnelV2> logger, IOptions<ServiceOptions
                     $"New V{Version} lobby from host {host} with {clients} clients."));
             }
 
-            var rand = new Random();
-
             while (clients > 0)
             {
-#pragma warning disable CA5394 // Do not use insecure randomness
-                int clientId = rand.Next(0, short.MaxValue);
-#pragma warning restore CA5394 // Do not use insecure randomness
+                int clientId = RandomNumberGenerator.GetInt32(0, short.MaxValue);
 
                 if (!Mappings.TryAdd((uint)clientId, new(ServiceOptions.Value.ClientTimeout)))
                     continue;

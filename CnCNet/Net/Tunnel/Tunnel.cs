@@ -50,7 +50,7 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            using IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(ServiceOptions.Value.MaxPacketSize);
+            IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(ServiceOptions.Value.MaxPacketSize);
             Memory<byte> buffer = memoryOwner.Memory[..ServiceOptions.Value.MaxPacketSize];
             var remoteSocketAddress = new SocketAddress(Client.AddressFamily);
             int receivedBytes;
@@ -61,15 +61,19 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
             }
             catch (SocketException ex)
             {
+                memoryOwner.Dispose();
                 await Logger.LogExceptionDetailsAsync(ex, LogLevel.Warning).ConfigureAwait(false);
                 continue;
             }
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+#pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
             _ = DoReceiveAsync(
-                buffer[..receivedBytes],
+                memoryOwner,
+                receivedBytes,
                 remoteSocketAddress,
                 cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+#pragma warning restore CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
     }
@@ -203,10 +207,11 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
         return false;
     }
 
-    private async Task DoReceiveAsync(ReadOnlyMemory<byte> buffer, SocketAddress socketAddress, CancellationToken cancellationToken)
+    private async Task DoReceiveAsync(IMemoryOwner<byte> memoryOwner, int receivedBytes, SocketAddress socketAddress, CancellationToken cancellationToken)
     {
         try
         {
+            ReadOnlyMemory<byte> buffer = memoryOwner.Memory[..receivedBytes];
             if (buffer.Length < MinimumPacketSize || buffer.Length > ServiceOptions.Value.MaxPacketSize)
             {
                 if (Logger.IsEnabled(LogLevel.Debug))
@@ -224,6 +229,10 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
         catch (Exception ex)
         {
             await Logger.LogExceptionDetailsAsync(ex).ConfigureAwait(false);
+        }
+        finally
+        {
+            memoryOwner.Dispose();
         }
     }
 
