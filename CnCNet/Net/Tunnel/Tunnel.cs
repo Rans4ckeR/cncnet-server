@@ -51,30 +51,41 @@ internal abstract class Tunnel(ILogger logger, IOptions<ServiceOptions> serviceO
         while (!cancellationToken.IsCancellationRequested)
         {
             IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(ServiceOptions.Value.MaxPacketSize);
-            Memory<byte> buffer = memoryOwner.Memory[..ServiceOptions.Value.MaxPacketSize];
-            var remoteSocketAddress = new SocketAddress(Client.AddressFamily);
-            int receivedBytes;
+            bool ownershipTransferred = false;
 
             try
             {
-                receivedBytes = await Client.ReceiveFromAsync(buffer, SocketFlags.None, remoteSocketAddress, cancellationToken).ConfigureAwait(false);
-            }
-            catch (SocketException ex)
-            {
-                memoryOwner.Dispose();
-                await Logger.LogExceptionDetailsAsync(ex, LogLevel.Warning).ConfigureAwait(false);
-                continue;
-            }
+                Memory<byte> buffer = memoryOwner.Memory[..ServiceOptions.Value.MaxPacketSize];
+                var remoteSocketAddress = new SocketAddress(Client.AddressFamily);
+                int receivedBytes;
+
+                try
+                {
+                    receivedBytes = await Client.ReceiveFromAsync(buffer, SocketFlags.None, remoteSocketAddress, cancellationToken).ConfigureAwait(false);
+                }
+                catch (SocketException ex)
+                {
+                    await Logger.LogExceptionDetailsAsync(ex, LogLevel.Warning).ConfigureAwait(false);
+                    continue;
+                }
+
+                ownershipTransferred = true;
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 #pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
-            _ = DoReceiveAsync(
-                memoryOwner,
-                receivedBytes,
-                remoteSocketAddress,
-                cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+                _ = DoReceiveAsync(
+                    memoryOwner,
+                    receivedBytes,
+                    remoteSocketAddress,
+                    cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 #pragma warning restore CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            }
+            finally
+            {
+                if (!ownershipTransferred)
+                    memoryOwner.Dispose();
+            }
         }
     }
 
