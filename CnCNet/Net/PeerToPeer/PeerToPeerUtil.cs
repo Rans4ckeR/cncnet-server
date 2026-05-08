@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CA1812 // Avoid uninstantiated internal classes
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 
 namespace CnCNetServer;
 
@@ -66,36 +67,49 @@ internal sealed class PeerToPeerUtil(ILogger<PeerToPeerUtil> logger) : IAsyncDis
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            using IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(64);
-            Memory<byte> buffer = memoryOwner.Memory[..64];
-            var remoteSocketAddress = new SocketAddress(client.AddressFamily);
-            int bytesReceived;
+            IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(64);
+            bool ownershipTransferred = false;
 
             try
             {
-                bytesReceived = await client.ReceiveFromAsync(buffer, SocketFlags.None, remoteSocketAddress, cancellationToken).ConfigureAwait(false);
-            }
-            catch (SocketException ex)
-            {
-                await logger.LogExceptionDetailsAsync(ex, LogLevel.Warning).ConfigureAwait(false);
-                continue;
-            }
+                Memory<byte> buffer = memoryOwner.Memory[..64];
+                var remoteSocketAddress = new SocketAddress(client.AddressFamily);
+                int bytesReceived;
 
-            if (bytesReceived is 48)
-            {
+                try
+                {
+                    bytesReceived = await client.ReceiveFromAsync(buffer, SocketFlags.None, remoteSocketAddress, cancellationToken).ConfigureAwait(false);
+                }
+                catch (SocketException ex)
+                {
+                    await logger.LogExceptionDetailsAsync(ex, LogLevel.Warning).ConfigureAwait(false);
+                    continue;
+                }
+
+                if (bytesReceived is 48)
+                {
+                    ownershipTransferred = true;
+
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 #pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
-                _ = ReceiveAsync(client, buffer, remoteSocketAddress, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+                    _ = ReceiveAsync(client, memoryOwner, remoteSocketAddress, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 #pragma warning restore CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                }
+            }
+            finally
+            {
+                if (!ownershipTransferred)
+                    memoryOwner.Dispose();
             }
         }
     }
 
-    private async Task ReceiveAsync(Socket client, ReadOnlyMemory<byte> receiveBuffer, SocketAddress remoteSocketAddress, CancellationToken cancellationToken)
+    private async Task ReceiveAsync(Socket client, IMemoryOwner<byte> receiveMemoryOwner, SocketAddress remoteSocketAddress, CancellationToken cancellationToken)
     {
         try
         {
+            ReadOnlyMemory<byte> receiveBuffer = receiveMemoryOwner.Memory[..48];
             var remoteIpEndpoint = (IPEndPoint)new IPEndPoint(0L, 0).Create(remoteSocketAddress);
 
             if (logger.IsEnabled(LogLevel.Debug))
@@ -110,23 +124,22 @@ internal sealed class PeerToPeerUtil(ILogger<PeerToPeerUtil> logger) : IAsyncDis
             using IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(40);
             Memory<byte> sendBuffer = memoryOwner.Memory[..40];
 
-#pragma warning disable CA5394 // Do not use insecure randomness
-            new Random().NextBytes(sendBuffer.Span);
-#pragma warning restore CA5394 // Do not use insecure randomness
-            BitConverter.GetBytes(IPAddress.HostToNetworkOrder(StunId)).AsSpan(..2).CopyTo(sendBuffer.Span[6..8]);
             byte[] addressBytes = remoteIpEndpoint.Address.IsIPv4MappedToIPv6 || remoteIpEndpoint.AddressFamily is AddressFamily.InterNetwork
                 ? remoteIpEndpoint.Address.MapToIPv4().GetAddressBytes()
                 : remoteIpEndpoint.Address.GetAddressBytes();
-
-            addressBytes.AsSpan(..addressBytes.Length).CopyTo(sendBuffer.Span[..addressBytes.Length]);
+            addressBytes.CopyTo(sendBuffer.Span[..addressBytes.Length]);
 
             byte[] portBytes = BitConverter.GetBytes(IPAddress.HostToNetworkOrder((short)remoteIpEndpoint.Port));
+            portBytes.CopyTo(sendBuffer.Span[addressBytes.Length..(addressBytes.Length + 2)]);
 
-            portBytes.AsSpan(..portBytes.Length).CopyTo(sendBuffer.Span[addressBytes.Length..(addressBytes.Length + 2)]);
+            byte[] stunIdBytes = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(StunId));
+            stunIdBytes.CopyTo(sendBuffer.Span[(addressBytes.Length + 2)..(addressBytes.Length + 4)]);
 
             // obfuscate
             for (int i = 0; i < addressBytes.Length + portBytes.Length; i++)
                 sendBuffer.Span[i] ^= 0x20;
+
+            RandomNumberGenerator.Fill(sendBuffer.Span[(addressBytes.Length + 4)..]);
 
             _ = await client.SendToAsync(sendBuffer, SocketFlags.None, remoteSocketAddress, cancellationToken).ConfigureAwait(false);
         }
@@ -137,6 +150,10 @@ internal sealed class PeerToPeerUtil(ILogger<PeerToPeerUtil> logger) : IAsyncDis
         catch (Exception ex)
         {
             await logger.LogExceptionDetailsAsync(ex).ConfigureAwait(false);
+        }
+        finally
+        {
+            receiveMemoryOwner.Dispose();
         }
     }
 
